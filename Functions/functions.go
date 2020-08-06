@@ -8,16 +8,17 @@ func add(a, b int) int {
 
 }
 
-func plusPlus(a string, b int, c int) int {
+func multipleReturn(a string, b int, c int) (int, string) {
 
-	fmt.Println("Message:", a)
-	return b + c
+	return b + c, a
 
 }
 
 func main() {
 
-	fmt.Println("Sum1", plusPlus("Test Message", 13, 12))
+	sum, msg := multipleReturn("Test Message", 13, 12)
+	fmt.Println("Sum1:", sum)
+	fmt.Println("Msg:", msg)
 	fmt.Println("Sum2:", add(12, 12))
 
 }
