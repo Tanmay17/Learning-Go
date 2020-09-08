@@ -6,13 +6,17 @@ import (
 	"io"
 	"log"
 	"encoding/csv"
+	"encoding/json"
 )
 
 func main()  {
 	
+	forever := make(chan bool, 1)
+
 	column := 0
-	var colname []string
 	read := make( chan []string )
+	final := make( chan string )
+	parseData := make([]map[string]interface{}, 0, 0)
 
 	csvfile, err := os.Open("dfy.csv")	
 	if err != nil {
@@ -35,7 +39,6 @@ func main()  {
 			}
 
 			if column == 0 {
-				colname = append(record) 
 				column++
 			} else {
 				read <- record
@@ -46,23 +49,25 @@ func main()  {
 	go func() {
 		for {
 			data, hasData := <-read
-
+			var singleMap = make(map[string]interface{})
 			if hasData {
-				fmt.Println(data, colname)
+				singleMap["id"] = data[0]
+				singleMap["name"] = data[1]
+				singleMap["description"] = data[2]
+				singleMap["image_url"] = data[3]
+				singleMap["color"] = data[4]
+				parseData = append(parseData, singleMap)
 			} else {
-				fmt.Println("received all Data")
+				b, _:= json.Marshal(parseData)
+				fmt.Println("received all Data")				
+				final <- string(b)
+				close(final)
 				return
 			}
 
 		}
 	}()
 
-	// for res := range colname { 
-    //     fmt.Println(res) 
-    // }
-
-	// for res := range read { 
-    //     fmt.Println(res) 
-	// }
-	<- read
+	fmt.Println(<-final)
+	<- forever
 }
